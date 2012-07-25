@@ -16,7 +16,7 @@
   <depend package="visp"/>
   <depend package="visp_bridge"/>
   <depend package="message_filters"/>
-
+  
 </package>
 
 

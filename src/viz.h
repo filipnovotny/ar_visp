@@ -46,6 +46,9 @@
  \file viz.h
  \brief 
  */
+#include "detectors/datamatrix/detector.h"
+#include "detectors/qrcode/detector.h"
+
 #include "ros/ros.h"
 #include "sensor_msgs/Image.h"
 #include "sensor_msgs/CameraInfo.h"
@@ -54,10 +57,14 @@
 #include <visp/vpDisplayX.h>
 #include <visp/vpImage.h>
 #include <visp/vpRGBa.h>
+#include <visp/vpVideoWriter.h>
 #include <string>
 #include <boost/thread/mutex.hpp>
 #include <message_filters/subscriber.h>
 #include <message_filters/time_synchronizer.h>
+
+#include "cmd_line/cmd_line.h"
+#include "tracking.h"
 
 #ifndef __AR_VISP_VIZ_H__
 #define __AR_VISP_VIZ_H__
@@ -69,7 +76,9 @@ private:
   ros::NodeHandle n_;
   ros::AsyncSpinner spinner_;
   unsigned int queue_size_;
-  vpImage<vpRGBa> I;
+  vpImage<vpRGBa> I,logI;
+  vpVideoWriter writer_;
+  unsigned int iter_;
 
   message_filters::Subscriber<sensor_msgs::Image> raw_image_subscriber_;
   message_filters::Subscriber<sensor_msgs::CameraInfo> camera_info_subscriber_;
@@ -82,7 +91,8 @@ private:
   boost::mutex guard_;
 
   vpCameraParameters cam_;
-
+  CmdLine *cmd_line_;
+  tracking::Tracker* t_;
   /*!
     \brief subscriber callback.
 
