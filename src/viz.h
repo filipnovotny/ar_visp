@@ -59,10 +59,9 @@
 #include <visp/vpRGBa.h>
 #include <visp/vpVideoWriter.h>
 #include <string>
-#include <boost/thread/mutex.hpp>
 #include <message_filters/subscriber.h>
 #include <message_filters/time_synchronizer.h>
-
+#include <fstream>
 #include "cmd_line/cmd_line.h"
 #include "tracking.h"
 
@@ -79,6 +78,8 @@ private:
   vpImage<vpRGBa> I,logI;
   vpVideoWriter writer_;
   unsigned int iter_;
+  bool display_ar_tracker_;
+  bool display_mb_tracker_;
 
   message_filters::Subscriber<sensor_msgs::Image> raw_image_subscriber_;
   message_filters::Subscriber<sensor_msgs::CameraInfo> camera_info_subscriber_;
@@ -86,13 +87,10 @@ private:
   message_filters::TimeSynchronizer<sensor_msgs::Image, sensor_msgs::CameraInfo, ar_pose::ARMarker> image_info_marker_sync_;
   vpDisplayX* d;
 
-
-
-  boost::mutex guard_;
-
   vpCameraParameters cam_;
   CmdLine *cmd_line_;
   tracking::Tracker* t_;
+  std::ofstream varfile_;
   /*!
     \brief subscriber callback.
 

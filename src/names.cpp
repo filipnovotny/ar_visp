@@ -54,6 +54,8 @@ namespace ar_visp
 {
   std::string camera_prefix("/visp_camera_calibration");
   std::string tracker_config_param("tracker_config");
+  std::string display_ar_tracker_param("display_ar_tracker");
+  std::string display_mb_tracker_param("display_mb_tracker");
   std::string raw_image_topic(camera_prefix + "/image_raw");
   std::string camera_info_topic(camera_prefix + "/camera_info");
   std::string ar_marker_topic("/ar_pose_marker");

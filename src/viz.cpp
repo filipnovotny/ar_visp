@@ -61,12 +61,14 @@
 #include <visp/vpV4l2Grabber.h>
 #include <iostream>
 #include <vector>
+#include <string>
 
 
 #include <visp/vpDisplayX.h>
 #include <boost/thread/thread.hpp>
 #include "threading.h"
 #include "events.h"
+#include "logfilewriter.hpp"
 
 namespace ar_visp
 {
@@ -89,10 +91,16 @@ Viz::Viz() :
   spinner_.start();
   std::string config;
   n_.param(ar_visp::tracker_config_param.c_str(), config, std::string("config.cfg"));
+  n_.param(ar_visp::display_ar_tracker_param.c_str(), display_ar_tracker_, true);
+  n_.param(ar_visp::display_mb_tracker_param.c_str(), display_mb_tracker_, true);
+
 
   cmd_line_ = new CmdLine(config);
   writer_.setFileName((cmd_line_->get_data_dir() + std::string("/log/%08d.jpg")).c_str());
-
+  if(cmd_line_->using_var_file()){
+    varfile_.open((cmd_line_->get_var_file()+std::string(".ar")).c_str(),std::ios::out);
+    //ROS_INFO(cmd_line_->get_var_file().c_str());
+  }
   writer_.open(logI);
   d = new vpDisplayX();
   d->init(I);
@@ -104,49 +112,62 @@ Viz::Viz() :
   else if(cmd_line_->get_detector_type() == CmdLine::DTMX)
     detector = new detectors::datamatrix::Detector;
   t_ = new tracking::Tracker(*cmd_line_,detector,false);
-  t_->start();
+  //t_->start();
 
-  //TrackerThread* tt = new TrackerThread(*t_);
-  //boost::thread* bt = new boost::thread(*tt);
+  TrackerThread* tt = new TrackerThread(*t_);
+  boost::thread* bt = new boost::thread(*tt);
   t_->process_event(tracking::select_input(I));
 
 }
 
 void Viz::frameCallback(const sensor_msgs::ImageConstPtr& image, const sensor_msgs::CameraInfoConstPtr& cam_info, const ar_pose::ARMarkerConstPtr& marker){
+  tracking::LogFileWriter writer(varfile_);
   cam_ = visp_bridge::toVispCameraParameters(*cam_info);
 
-  //cam_.initPersProjWithDistortion(543.1594454,539.1300717,320.1025306,212.8181022,0.01488495076,-0.01484690262);
   this->I = visp_bridge::toVispImageRGBa(*image);
-  vpHomogeneousMatrix cMo = visp_bridge::toVispHomogeneousMatrix(marker->pose.pose);
   vpDisplay::display(this->I);
 
-  t_->process_event(tracking::input_ready(this->I,cam_,iter_));
+  vpHomogeneousMatrix cMo;
+  if(display_ar_tracker_){
+    cMo = visp_bridge::toVispHomogeneousMatrix(marker->pose.pose);
 
-  vpHomogeneousMatrix cMo_err;//static error matrix
-  cMo_err[0][0] = -0.44389436959795;
-  cMo_err[0][1] = 0.84731901068995;
-  cMo_err[0][2] = 0.29156179941363;
-  cMo_err[0][3] = 0;//-0.13808424723959;
+    if(cmd_line_->using_var_file()){
+      writer.write(iter_);
+      for(int i=0;i<6*6;i++)
+        writer.write(marker->pose.covariance[i]);
 
-  cMo_err[1][0] = -0.018874688966252;
-  cMo_err[1][1] = -0.33414412377255;
-  cMo_err[1][2] = 0.94233298293487;
-  cMo_err[1][3] = 0;//0.065815147353372;
+    }
 
-  cMo_err[2][0] = 0.89588031279147;
-  cMo_err[2][1] = 0.41279316708782;
-  cMo_err[2][2] = 0.16431757791075;
-  cMo_err[2][3] = 0;//0.27235909228323;
+  }
 
-  cMo_err[3][0] = 0;
-  cMo_err[3][1] = 0;
-  cMo_err[3][2] = 0;
-  cMo_err[3][3] = 1;
+  if(display_mb_tracker_)
+    t_->process_event(tracking::input_ready(this->I,cam_,iter_));
+
+  if(display_ar_tracker_){
+    vpHomogeneousMatrix cMo_err;//static error matrix
+    cMo_err[0][0] = -0.44389436959795;
+    cMo_err[0][1] = 0.84731901068995;
+    cMo_err[0][2] = 0.29156179941363;
+    cMo_err[0][3] = 0;//-0.13808424723959;
+
+    cMo_err[1][0] = -0.018874688966252;
+    cMo_err[1][1] = -0.33414412377255;
+    cMo_err[1][2] = 0.94233298293487;
+    cMo_err[1][3] = 0;//0.065815147353372;
+
+    cMo_err[2][0] = 0.89588031279147;
+    cMo_err[2][1] = 0.41279316708782;
+    cMo_err[2][2] = 0.16431757791075;
+    cMo_err[2][3] = 0;//0.27235909228323;
+
+    cMo_err[3][0] = 0;
+    cMo_err[3][1] = 0;
+    cMo_err[3][2] = 0;
+    cMo_err[3][3] = 1;
 
 
-  vpDisplay::displayFrame(this->I,cMo*cMo_err,cam_,.1,vpColor::gray,4);
-  //ROS_INFO_STREAM("iter="<<iter_);
-  //ROS_INFO_STREAM("ar:" << cMo*cMo_err);
+    vpDisplay::displayFrame(this->I,cMo/**cMo_err*/,cam_,.1,vpColor::gray,4);
+  }
 
   vpDisplay::flush(this->I);
   d->getImage(logI);
@@ -159,5 +180,6 @@ Viz::~Viz()
   delete cmd_line_;
   delete d;
   writer_.close();
+  varfile_.close();
 }
 }
