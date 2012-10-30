@@ -90,13 +90,15 @@ Viz::Viz() :
 
   spinner_.start();
   std::string config;
+  std::string log;
   n_.param(ar_visp::tracker_config_param.c_str(), config, std::string("config.cfg"));
   n_.param(ar_visp::display_ar_tracker_param.c_str(), display_ar_tracker_, true);
   n_.param(ar_visp::display_mb_tracker_param.c_str(), display_mb_tracker_, true);
+  n_.param(ar_visp::tracker_log_param.c_str(), log, std::string("/log/%08d.jpg"));
 
 
   cmd_line_ = new CmdLine(config);
-  writer_.setFileName((cmd_line_->get_data_dir() + std::string("/log/%08d.jpg")).c_str());
+  writer_.setFileName((cmd_line_->get_data_dir() + log).c_str());
   if(cmd_line_->using_var_file()){
     varfile_.open((cmd_line_->get_var_file()+std::string(".ar")).c_str(),std::ios::out);
     //ROS_INFO(cmd_line_->get_var_file().c_str());
@@ -165,8 +167,10 @@ void Viz::frameCallback(const sensor_msgs::ImageConstPtr& image, const sensor_ms
     cMo_err[3][2] = 0;
     cMo_err[3][3] = 1;
 
-
-    vpDisplay::displayFrame(this->I,cMo/**cMo_err*/,cam_,.1,vpColor::gray,4);
+    if(display_mb_tracker_)
+      vpDisplay::displayFrame(this->I,cMo/**cMo_err*/,cam_,.1,vpColor::gray,4);
+    else
+      vpDisplay::displayFrame(this->I,cMo,cam_,.1,vpColor::none, 2);
   }
 
   vpDisplay::flush(this->I);

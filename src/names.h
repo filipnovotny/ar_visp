@@ -56,6 +56,7 @@ namespace ar_visp
 {
   extern std::string camera_prefix;
   extern std::string tracker_config_param;
+  extern std::string tracker_log_param;
   extern std::string display_ar_tracker_param;
   extern std::string display_mb_tracker_param;
   extern std::string raw_image_topic;
