@@ -46,9 +46,6 @@
  \file viz.h
  \brief 
  */
-#include "detectors/datamatrix/detector.h"
-#include "detectors/qrcode/detector.h"
-
 #include "ros/ros.h"
 #include "sensor_msgs/Image.h"
 #include "sensor_msgs/CameraInfo.h"
@@ -62,8 +59,7 @@
 #include <message_filters/subscriber.h>
 #include <message_filters/time_synchronizer.h>
 #include <fstream>
-#include "cmd_line/cmd_line.h"
-#include "tracking.h"
+#include <list>
 
 #ifndef __AR_VISP_VIZ_H__
 #define __AR_VISP_VIZ_H__
@@ -76,10 +72,12 @@ private:
   ros::AsyncSpinner spinner_;
   unsigned int queue_size_;
   vpImage<vpRGBa> I,logI;
+  std::list<sensor_msgs::Image > art_potentially_untracked_;
   vpVideoWriter writer_;
   unsigned int iter_;
   bool display_ar_tracker_;
-  bool display_mb_tracker_;
+
+  std::string pose_file_name_;
 
   message_filters::Subscriber<sensor_msgs::Image> raw_image_subscriber_;
   message_filters::Subscriber<sensor_msgs::CameraInfo> camera_info_subscriber_;
@@ -88,14 +86,20 @@ private:
   vpDisplayX* d;
 
   vpCameraParameters cam_;
-  CmdLine *cmd_line_;
-  tracking::Tracker* t_;
   std::ofstream varfile_;
   /*!
-    \brief subscriber callback.
+    \brief subscriber callback. Synchronizes ar marker and camera.
 
+    Goes through list and separates untracked images from tracked ones.
    */
   void frameCallback(const sensor_msgs::ImageConstPtr& image, const sensor_msgs::CameraInfoConstPtr& cam_info, const ar_pose::ARMarkerConstPtr& marker);
+
+  /*!
+      \brief subscriber callback. adds image to queue .
+
+     */
+
+  void frameCallbackWithoutMarker(const sensor_msgs::ImageConstPtr& image);
 
 public:
   Viz();

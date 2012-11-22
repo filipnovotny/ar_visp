@@ -62,6 +62,7 @@ namespace ar_visp
   extern std::string raw_image_topic;
   extern std::string camera_info_topic;
   extern std::string ar_marker_topic;
+  extern std::string pose_file_param;
 
   void remap();
 

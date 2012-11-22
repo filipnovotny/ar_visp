@@ -34,25 +34,11 @@ ENDIF(VISP_FOUND)
 
 INCLUDE_DIRECTORIES(${OpenCV_DIR})
 
-rosbuild_add_library(cmd_line modules/flashcode_mbt/cmd_line/cmd_line.cpp modules/flashcode_mbt/cmd_line/cmd_line.h)
-add_subdirectory(modules/flashcode_mbt/detectors)
-include_directories(modules/flashcode_mbt/detectors)
-include_directories(modules/flashcode_mbt)
 #ADD_EXECUTABLE( tracking main.cpp states.hpp events.h tracking.h tracking.cpp logfilewriter.hpp threading.h threading.cpp video.h video.cpp logitech.hpp)
 #TARGET_LINK_LIBRARIES( tracking ${OpenCV_LIBS} qrcode_detector datamatrix_detector dmtx zbar boost_program_options cmd_line boost_thread)
 
 rosbuild_add_executable(
 ar_visp src/viz.cpp src/viz_main.cpp 
-modules/flashcode_mbt/states.hpp
-modules/flashcode_mbt/events.h 
-modules/flashcode_mbt/tracking.h 
-modules/flashcode_mbt/tracking.cpp 
-modules/flashcode_mbt/logfilewriter.hpp 
-modules/flashcode_mbt/threading.h 
-modules/flashcode_mbt/threading.cpp 
-modules/flashcode_mbt/video.h 
-modules/flashcode_mbt/video.cpp 
-modules/flashcode_mbt/logitech.hpp
 )
-target_link_libraries(ar_visp ${OpenCV_LIBS} ar_visp_common visp_bridge qrcode_detector datamatrix_detector dmtx zbar cmd_line)
+target_link_libraries(ar_visp ${OpenCV_LIBS} ar_visp_common visp_bridge)
 rosbuild_link_boost(ar_visp thread signals program_options)

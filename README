@@ -1,0 +1,5 @@
+subscribes to a camera topic and outputs tracked images with artoolkit (ar_pose in ros).
+It also logs them as well as the pose for gnuplot display.
+
+usage:
+roslaunch launch/record_art.launch log_pattern:=/path/to/log/%08d.jpg pose_file:=/path/to/pose/pose.txt images_path:=/path/to/images

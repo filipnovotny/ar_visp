@@ -57,7 +57,5 @@ int main(int argc,char** argv){
   ar_visp::remap();
   ar_visp::Viz viz;
 
-  ros::waitForShutdown();
-
   return 0;
 }
