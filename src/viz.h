@@ -75,7 +75,6 @@ private:
   std::list<sensor_msgs::Image > art_potentially_untracked_;
   vpVideoWriter writer_;
   unsigned int iter_;
-  bool display_ar_tracker_;
 
   std::string pose_file_name_;
 

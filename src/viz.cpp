@@ -86,8 +86,6 @@ Viz::Viz() :
   std::string log;
   n_.param(ar_visp::tracker_config_param.c_str(), config, std::string("config.cfg"));
   n_.param(ar_visp::pose_file_param.c_str(), pose_file_name_, std::string("var.txt"));
-  n_.param(ar_visp::display_ar_tracker_param.c_str(), display_ar_tracker_, true);
-  n_.param(ar_visp::display_mb_tracker_param.c_str(), display_mb_tracker_, true);
   n_.param(ar_visp::tracker_log_param.c_str(), log, std::string("/log/%08d.jpg"));
 
   writer_.setFileName(log.c_str());
