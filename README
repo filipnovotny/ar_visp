@@ -3,3 +3,5 @@ It also logs them as well as the pose for gnuplot display.
 
 usage:
 roslaunch launch/record_art.launch log_pattern:=/path/to/log/%08d.jpg pose_file:=/path/to/pose/pose.txt images_path:=/path/to/images
+
+How to create ART patterns: http://www.hitl.washington.edu/artoolkit/documentation/devmulti.htm
