@@ -104,14 +104,19 @@ Viz::Viz() :
 void Viz::frameCallbackWithoutMarker(const sensor_msgs::ImageConstPtr& image){
   art_potentially_untracked_.push_back(*image);
   iter_++;
+  this->I = visp_bridge::toVispImageRGBa(*image);
+  vpDisplay::display(this->I);
+  vpDisplay::displayCharString(this->I,vpImagePoint(50,50),"buffering image until I see a pattern...",vpColor::red);
+  vpDisplay::flush(this->I);
 }
 
 void Viz::frameCallback(const sensor_msgs::ImageConstPtr& image, const sensor_msgs::CameraInfoConstPtr& cam_info, const ar_pose::ARMarkerConstPtr& marker){
-
   for(std::list<sensor_msgs::Image>::iterator i=art_potentially_untracked_.begin();i!=art_potentially_untracked_.end();){
     this->I = visp_bridge::toVispImageRGBa(*i);
+
     vpDisplay::display(this->I);
     if(i->header.stamp.toNSec() < image->header.stamp.toNSec()){
+      vpDisplay::displayCharString(this->I,vpImagePoint(50,50),"saving frames from buffer...",vpColor::red);
       writer_.saveFrame(this->I);
       vpDisplay::flush(this->I);
       i=art_potentially_untracked_.erase(i);
